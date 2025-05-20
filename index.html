@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>교실 자리 바꾸기</title>
+
+<!-- ▶︎ 스타일 (사용자가 주신 디자인 그대로) ---------------------------------- -->
+<style>
+  /* 기본 스타일 */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  :root {
+    --primary: #4f46e5;
+    --primary-light: #818cf8;
+    --primary-dark: #4338ca;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 4px 6px rgba(0,0,0,0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    --radius: 0.5rem;
+  }
+  
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: #f8fafc;
+    color: var(--gray-800);
+    line-height: 1.5;
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3 {
+    color: var(--gray-800);
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.25rem;
+  }
+  
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* 버튼 스타일 */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background: var(--primary-dark);
+  }
+  
+  .btn-outline {
+    background: white;
+    border: 1px solid var(--gray-300);
+    color: var(--gray-700);
+  }
+  
+  .btn-outline:hover {
+    background: var(--gray-100);
+  }
+  
+  .btn-success {
+    background: var(--success);
+    color: white;
+  }
+  
+  .btn-success:hover {
+    background: #0ea371;
+  }
+  
+  .btn-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* 아이콘 */
+  .icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke-width: 2;
+    stroke: currentColor;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  
+  .icon-sm {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  /* 레이아웃 */
+  .app-container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+  }
+  
+  /* 사이드바 */
+  .sidebar {
+    background: white;
+    width: 320px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--gray-200);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow-y: auto;
+    z-index: 30;
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .sidebar-content {
+    flex: 1;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .sidebar-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  /* 메인 콘텐츠 */
+  .main {
+    flex: 1;
+    padding: 1.5rem;
+    margin-left: 320px;
+    width: calc(100% - 320px);
+    overflow-y: auto;
+  }
+  
+  .main-header {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .action-bar {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  /* 폼 요소 */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-label {
+    display: block;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--gray-700);
+    font-weight: 500;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  
+  .form-control:focus {
+    border-color: var(--primary-light);
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+  
+  textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  .input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  /* 카드와 박스 */
+  .card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 1rem;
+    border: 1px solid var(--gray-200);
+  }
+  
+  .card-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  /* 탭 */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--gray-200);
+    margin-bottom: 1rem;
+  }
+  
+  .tab-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  
+  .tab-item.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+  
+  /* 자리배치 */
+  .sections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+  }
+  
+  .section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-200);
+  }
+  
+  .section h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--gray-700);
+    font-size: 1.125rem;
+  }
+  
+  .desks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .desk {
+    display: flex;
+    justify-content: space-between;
+    background: var(--gray-100);
+    border-radius: var(--radius);
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+  
+  .seat {
+    flex: 1;
+    padding: 0.6rem 0.75rem;
+    border-radius: calc(var(--radius) - 0.125rem);
+    background: white;
+    box-shadow: var(--shadow-sm);
+    font-weight: 500;
+    text-align: center;
+    cursor: grab;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  
+  .seat:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-1px);
+  }
+  
+  .seat.locked {
+    background: #fff1f1;
+    border: 1px solid #ffd7d7;
+    cursor: not-allowed;
+  }
+  
+  .seat.drag-over {
+    outline: 2px dashed var(--primary);
+    outline-offset: 2px;
+  }
+  
+  .lock-icon {
+    display: inline-block;
+    margin-left: 0.25rem;
+    color: var(--danger);
+  }
+  
+  /* 툴팁 */
+  .tooltip {
+    position: relative;
+  }
+  
+  .tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gray-800);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 10;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* 모바일 반응형 */
+  .mobile-toggle {
+    display: none;
+    background: var(--primary);
+    color: white;
+    width: 3rem;
+    height: 3rem;
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 40;
+    box-shadow: var(--shadow-lg);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 20;
+  }
+  
+  /* 알림 */
+  .alert {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .alert-info {
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+  }
+  
+  .alert-warning {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    color: #9a3412;
+  }
+  
+  /* 인쇄시 스타일 */
+  @media print {
+    .noprint {
+      display: none !important;
+    }
+    
+    body {
+      background: white;
+      display: block;
+    }
+    
+    .main {
+      margin-left: 0;
+      width: 100%;
+      padding: 0;
+    }
+    
+    .section {
+      box-shadow: none;
+      border: 1px solid var(--gray-300);
+      page-break-inside: avoid;
+    }
+  }
+  
+  /* 모바일 반응형 */
+  @media (max-width: 1024px) {
+    .sidebar {
+      transform: translateX(-100%);
+    }
+    
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    
+    .main {
+      margin-left: 0;
+      width: 100%;
+    }
+    
+    .mobile-toggle {
+      display: flex;
+    }
+    
+    .sidebar-overlay.open {
+      display: block;
+    }
+  }
+</style>
+
+<!-- ▶︎ html2canvas & jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- 사이드바 오버레이 (모바일용) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- 사이드바 -->
+    <aside class="sidebar noprint" id="sidebar">
+      <div class="sidebar-header">
+        <h1>자리 바꾸기</h1>
+        <button class="btn btn-icon btn-outline mobile-close" id="closeSidebar">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="sidebar-content">
+        <!-- 탭 메뉴 -->
+        <div class="tabs">
+          <div class="tab-item active" data-tab="settings">설정</div>
+          <div class="tab-item" data-tab="students">학생</div>
+          <div class="tab-item" data-tab="export">내보내기</div>
+        </div>
+        
+        <!-- 설정 탭 -->
+        <div class="tab-content" id="settingsTab">
+          <div class="form-group">
+            <label class="form-label">분단 수</label>
+            <input type="number" class="form-control" id="secCount" min="1" value="3">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">각 분단 줄 수 (콤마로 구분)</label>
+            <input type="text" class="form-control" id="rowPattern" placeholder="예) 5,4,4">
+          </div>
+          
+          <button class="btn btn-primary" onclick="saveLayout()">
+            <svg class="icon icon-sm" viewBox="0 0 24 24">
+              <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            설정 저장
+          </button>
+        </div>
+        
+        <!-- 학생 탭 -->
+        <div class="tab-content" id="studentsTab" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">학생 이름 (한 줄 = 한 명)</label>
+            <textarea class="form-control" id="nameInput" rows="12"></textarea>
+          </div>
+          
+          <button class="btn btn-primary" onclick="saveNames()">
+            <svg class="icon icon-sm" viewBox="0 0 24 24">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            이름 저장
+          </button>
+        </div>
+        
+        <!-- 내보내기 탭 -->
+        <div class="tab-content" id="exportTab" style="display: none;">
+          <div class="alert alert-info">
+            현재 자리배치를 저장하거나 인쇄할 수 있습니다.
+          </div>
+          
+          <div class="form-group">
+            <button class="btn btn-outline" onclick="saveAsImage()" style="width:100%; margin-bottom:0.5rem">
+              <svg class="icon icon-sm" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              이미지 저장
+            </button>
+            
+            <button class="btn btn-outline" onclick="saveAsPdf()" style="width:100%; margin-bottom:0.5rem">
+              <svg class="icon icon-sm" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              PDF 저장
+            </button>
+            
+            <button class="btn btn-outline" onclick="saveAsCsv()" style="width:100%; margin-bottom:0.5rem">
+              <svg class="icon icon-sm" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              CSV 저장
+            </button>
+            
+            <button class="btn btn-outline" onclick="window.print()" style="width:100%;">
+              <svg class="icon icon-sm" viewBox="0 0 24 24">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+              </svg>
+              인쇄
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="sidebar-footer">
+        <button class="btn btn-success" style="flex: 1" onclick="shuffleSeats()">
+          <svg class="icon icon-sm" viewBox="0 0 24 24">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+          자리 바꾸기
+        </button>
+      </div>
+    </aside>
+    
+    <!-- 메인 콘텐츠 -->
+    <main class="main">
+      <div class="main-header noprint">
+        <h2>자리 배치표</h2>
+        <div class="action-bar">
+          <span class="tooltip" data-tooltip="잠금된 자리는 그대로 유지됩니다">
+            <button class="btn btn-primary" onclick="shuffleSeats()">
+              <svg class="icon icon-sm" viewBox="0 0 24 24">
+                <polyline points="16 3 21 3 21 8"></polyline>
+                <line x1="4" y1="20" x2="21" y2="3"></line>
+                <polyline points="21 16 21 21 16 21"></polyline>
+                <line x1="15" y1="15" x2="21" y2="21"></line>
+                <line x1="4" y1="4" x2="9" y2="9"></line>
+              </svg>
+              자리 바꾸기
+            </button>
+          </span>
+        </div>
+      </div>
+      
+      <!-- 자리 출력 영역 -->
+      <div id="layout" class="sections"></div>
+    </main>
+  </div>
+  
+  <!-- 모바일용 토글 버튼 -->
+  <div class="mobile-toggle noprint" id="openSidebar">
+    <svg class="icon" viewBox="0 0 24 24">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </div>
+
+<script>
+/*************************************************
+ * 0. 로컬 스토리지 KEY
+ *************************************************/
+const LS_KEY = {
+  NAMES : 'class_names',
+  LOCK  : 'class_locked',
+  ROWS  : 'class_rows',
+  ACTIVE_TAB: 'class_active_tab'
+};
+
+/*************************************************
+ * 1. 초기 상태 로드
+ *************************************************/
+let students   = JSON.parse(localStorage.getItem(LS_KEY.NAMES)  || '[]');
+let rowsInput  = JSON.parse(localStorage.getItem(LS_KEY.ROWS)   || '[5,4,4]');
+let lockedArr  = JSON.parse(localStorage.getItem(LS_KEY.LOCK)   || '[]');
+if(students.length===0) students = Array.from({length:26},(_,i)=>`학생${i+1}`);
+let seatArr = [...students];
+let activeTab = localStorage.getItem(LS_KEY.ACTIVE_TAB) || 'settings';
+
+/*************************************************
+ * 2. 유틸 함수
+ *************************************************/
+const rand = arr => { for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; };
+const totalSeats = () => rowsInput.reduce((sum,row)=>sum+row*2,0);
+const idx = (sec,row,side)=> rowsInput.slice(0,sec).reduce((t,r)=>t+r*2,0) + row*2 + side;
+
+/*************************************************
+ * 3. 저장 & 알림
+ *************************************************/
+function saveStorage(){
+  localStorage.setItem(LS_KEY.NAMES , JSON.stringify(students));
+  localStorage.setItem(LS_KEY.LOCK  , JSON.stringify(lockedArr));
+  localStorage.setItem(LS_KEY.ROWS  , JSON.stringify(rowsInput));
+  localStorage.setItem(LS_KEY.ACTIVE_TAB, activeTab);
+}
+function showNotification(msg,type='info'){
+  const colors = {info:'#38bdf8',success:'#10b981',warning:'#f59e0b',danger:'#ef4444'};
+  const div = document.createElement('div');
+  div.className='alert noprint';
+  div.style.background=`${colors[type]}20`;
+  div.style.border=`1px solid ${colors[type]}80`;
+  div.style.color=colors[type];
+  div.style.position='fixed';
+  div.style.top='1rem';
+  div.style.right='1rem';
+  div.style.zIndex='50';
+  div.textContent=msg;
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),2500);
+}
+
+/*************************************************
+ * 4. 이름 저장
+ *************************************************/
+function saveNames(){
+  const arr = document.getElementById('nameInput').value.split(/\n|,/).map(s=>s.trim()).filter(Boolean);
+  if(arr.length!==totalSeats()) return showNotification(`현재 자리 수는 ${totalSeats()}명 입니다.`, 'warning');
+  students=[...arr]; seatArr=[...students]; lockedArr=Array(totalSeats()).fill(false);
+  saveStorage(); renderAll();
+  showNotification('학생 이름이 저장되었습니다.','success');
+}
+
+/*************************************************
+ * 5. 레이아웃 저장
+ *************************************************/
+function saveLayout(){
+  const c = +document.getElementById('secCount').value;
+  const rp = document.getElementById('rowPattern').value.split(',').map(s=>+s.trim()).filter(Boolean);
+  if(c<=0 || rp.length!==c || !rp.every(n=>Number.isInteger(n)&&n>0))
+      return showNotification('분단 수와 줄 수 입력이 올바르지 않습니다.','warning');
+  rowsInput=rp;
+  const need=totalSeats();
+  if(students.length<need) students.push(...Array(need-students.length).fill('빈칸'));
+  if(students.length>need) students=students.slice(0,need);
+  seatArr=[...students]; lockedArr=Array(need).fill(false);
+  saveStorage(); renderAll();
+  showNotification('교실 설정이 저장되었습니다.','success');
+}
+
+/*************************************************
+ * 6. 무작위 배치 (잠금 제외)
+ *************************************************/
+function shuffleSeats(){
+  const available = seatArr.filter((_,i)=>!lockedArr[i]);
+  rand(available);
+  let p=0; for(let i=0;i<seatArr.length;i++) if(!lockedArr[i]) seatArr[i]=available[p++];
+  renderAll(); saveStorage();
+  showNotification('자리 배치가 변경되었습니다.','success');
+}
+
+/*************************************************
+ * 7. 자리 렌더링 + 이벤트
+ *************************************************/
+function renderAll(){
+  const layout=document.getElementById('layout');
+  layout.innerHTML='';
+  rowsInput.forEach((rows,sec)=>{
+    const secDiv=document.createElement('div');
+    secDiv.className='section';
+    secDiv.innerHTML=`<h2>${sec+1}분단</h2><div class="desks"></div>`;
+    const desks=secDiv.querySelector('.desks');
+    for(let r=0;r<rows;r++){
+      const l=idx(sec,r,0), rt=idx(sec,r,1);
+      desks.insertAdjacentHTML('beforeend',`
+        <div class="desk">
+          <div class="seat ${lockedArr[l]?'locked':''}" draggable="true" data-index="${l}">
+            ${seatArr[l]}${lockedArr[l]?'<span class="lock-icon">🔒</span>':''}
+          </div>
+          <div class="seat ${lockedArr[rt]?'locked':''}" draggable="true" data-index="${rt}">
+            ${seatArr[rt]}${lockedArr[rt]?'<span class="lock-icon">🔒</span>':''}
+          </div>
+        </div>`);
+    }
+    layout.appendChild(secDiv);
+  });
+  bindSeatEvents();
+  document.getElementById('nameInput').value=students.join('\n');
+  document.getElementById('secCount').value=rowsInput.length;
+  document.getElementById('rowPattern').value=rowsInput.join(',');
+}
+
+function bindSeatEvents(){
+  document.querySelectorAll('.seat').forEach(el=>{
+    const i=+el.dataset.index;
+    el.ondragstart=e=>{ if(lockedArr[i]){e.preventDefault();} else {e.dataTransfer.setData('text/plain',i);} };
+    el.ondragover=e=>{ if(!lockedArr[i]){ e.preventDefault(); el.classList.add('drag-over'); } };
+    el.ondragleave=()=>el.classList.remove('drag-over');
+    el.ondrop=e=>{
+      el.classList.remove('drag-over');
+      const from=+e.dataTransfer.getData('text/plain');
+      if(from===i||lockedArr[i]) return;
+      [seatArr[from],seatArr[i]]=[seatArr[i],seatArr[from]];
+      [lockedArr[from],lockedArr[i]]=[lockedArr[i],lockedArr[from]];
+      renderAll(); saveStorage();
+    };
+    el.onclick=()=>{ lockedArr[i]=!lockedArr[i]; renderAll(); saveStorage(); };
+  });
+}
+
+/*************************************************
+ * 8. 내보내기 기능 (CSV/PNG/PDF)
+ *************************************************/
+function saveAsCsv(){
+  let csv='Section,Row,Seat,Name,Locked\n';
+  rowsInput.forEach((rows,sec)=>{
+    for(let r=0;r<rows;r++){
+      ['왼','오'].forEach((side,s)=>{
+        const id=idx(sec,r,s);
+        csv+=`${sec+1},${r+1},${side},${seatArr[id]},${lockedArr[id]?'Y':'N'}\n`;
+      });
+    }
+  });
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);
+  link.download=`seat_${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+}
+async function saveAsImage(){
+  const canvas=await html2canvas(document.getElementById('layout'));
+  const link=document.createElement('a');
+  link.download=`seat_${Date.now()}.png`;
+  link.href=canvas.toDataURL();
+  link.click();
+}
+async function saveAsPdf(){
+  const canvas=await html2canvas(document.getElementById('layout'));
+  const pdf=new jspdf.jsPDF({orientation:'portrait',unit:'px',format:[canvas.width,canvas.height]});
+  pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,canvas.width,canvas.height);
+  pdf.save(`seat_${Date.now()}.pdf`);
+}
+
+/*************************************************
+ * 9. TAB / 모바일 사이드바 컨트롤
+ *************************************************/
+function showTab(tab){
+  activeTab=tab; saveStorage();
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.tab-content').forEach(c=>c.style.display=(c.id===tab+'Tab')?'block':'none');
+}
+// 탭 클릭 이벤트
+ document.querySelectorAll('.tab-item').forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
+
+// 모바일 사이드바
+const sidebar=document.getElementById('sidebar');
+const overlay=document.getElementById('sidebarOverlay');
+document.getElementById('openSidebar').onclick=()=>{sidebar.classList.add('open');overlay.classList.add('open');};
+document.getElementById('closeSidebar').onclick=()=>{sidebar.classList.remove('open');overlay.classList.remove('open');};
+overlay.onclick=()=>{sidebar.classList.remove('open');overlay.classList.remove('open');};
+
+/*************************************************
+ * 10. 초기 렌더
+ *************************************************/
+(function init(){
+  // 자리 수 보정
+  if(seatArr.length!==totalSeats()){
+    const need=totalSeats();
+    if(seatArr.length<need) seatArr.push(...Array(need-seatArr.length).fill('빈칸'));
+    if(seatArr.length>need) seatArr=seatArr.slice(0,need);
+    lockedArr=Array(need).fill(false);
+  }
+  renderAll();
+  showTab(activeTab);
+})();
+</script>
+</body>
+</html>
