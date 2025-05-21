@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>교실 자리 바꾸기</title>
 
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>교실 자리 바꾸기</title>
+
 <!-- ▶︎ 스타일 (사용자가 주신 디자인 그대로) ---------------------------------- -->
 <style>
   /* 기본 스타일 */
@@ -39,6 +46,7 @@
     color: var(--gray-800);
     line-height: 1.5;
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -430,10 +438,11 @@
   
   /* 광고 스타일 */
   .ad-container {
-    margin-bottom: 1.5rem;
     width: 100%;
     display: flex;
     justify-content: center;
+    padding-top: 1.5rem;
+    margin-top: auto;
   }
   
   /* 인쇄시 스타일 */
