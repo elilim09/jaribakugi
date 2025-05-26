@@ -544,21 +544,55 @@
           </button>
         </div>
         
-        <!-- 학생 탭 -->
         <div class="tab-content" id="studentsTab" style="display: none;">
-          <div class="form-group">
-            <label class="form-label">학생 이름 (한 줄 = 한 명)</label>
-            <textarea class="form-control" id="nameInput" rows="12"></textarea>
-          </div>
-          
-          <button class="btn btn-primary" onclick="saveNames()">
-            <svg class="icon icon-sm" viewBox="0 0 24 24">
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            이름 저장
-          </button>
-        </div>
+  <div class="form-group">
+    <label class="form-label">학생 이름/성별 (한 줄 = 한 명, 예: 김남자/1, 김여자/2)</label>
+    <div class="alert alert-info" style="margin-bottom: 0.5rem; padding: 0.5rem;">
+      <small>이름 뒤에 /1(남자) 또는 /2(여자)를 붙여 입력해주세요.</small>
+    </div>
+    <textarea class="form-control" id="nameInput" rows="12" placeholder="황현준/1&#10;강윤서/2&#10;김철수/1&#10;이영희/2"></textarea>
+  </div>
+  
+  <div class="form-group">
+    <label class="form-label">
+      <input type="checkbox" id="genderPairMode" style="margin-right: 0.5rem;">
+      남녀 짝궁으로 배치
+    </label>
+  </div>
+  
+  <button class="btn btn-primary" onclick="saveNames()">
+    <svg class="icon icon-sm" viewBox="0 0 24 24">
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+    이름 저장
+  </button>
+</div>
+
+<!-- 2. 사이드바 푸터에 번호순 버튼 추가 -->
+<div class="sidebar-footer">
+  <button class="btn btn-outline" style="flex: 1; margin-right: 0.5rem;" onclick="arrangeByNumber()">
+    <svg class="icon icon-sm" viewBox="0 0 24 24">
+      <line x1="8" y1="6" x2="21" y2="6"></line>
+      <line x1="8" y1="12" x2="21" y2="12"></line>
+      <line x1="8" y1="18" x2="21" y2="18"></line>
+      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+    </svg>
+    번호순
+  </button>
+  <button class="btn btn-success" style="flex: 1" onclick="shuffleSeats()">
+    <svg class="icon icon-sm" viewBox="0 0 24 24">
+      <polyline points="16 3 21 3 21 8"></polyline>
+      <line x1="4" y1="20" x2="21" y2="3"></line>
+      <polyline points="21 16 21 21 16 21"></polyline>
+      <line x1="15" y1="15" x2="21" y2="21"></line>
+      <line x1="4" y1="4" x2="9" y2="9"></line>
+    </svg>
+    자리 바꾸기
+  </button>
+</div>
         
         <!-- 내보내기 탭 -->
         <div class="tab-content" id="exportTab" style="display: none;">
@@ -683,6 +717,8 @@ let lockedArr  = JSON.parse(localStorage.getItem(LS_KEY.LOCK)   || '[]');
 if(students.length===0) students = Array.from({length:26},(_,i)=>`학생${i+1}`);
 let seatArr = [...students];
 let activeTab = localStorage.getItem(LS_KEY.ACTIVE_TAB) || 'settings';
+let studentGenders = JSON.parse(localStorage.getItem('class_genders') || '[]');
+let genderPairMode = JSON.parse(localStorage.getItem('gender_pair_mode') || 'false');
 
 /*************************************************
  * 2. 유틸 함수
@@ -719,12 +755,42 @@ function showNotification(msg,type='info'){
 /*************************************************
  * 4. 이름 저장
  *************************************************/
+
+// saveNames 함수 수정
 function saveNames(){
-  const arr = document.getElementById('nameInput').value.split(/\n|,/).map(s=>s.trim()).filter(Boolean);
-  if(arr.length!==totalSeats()) return showNotification(`현재 자리 수는 ${totalSeats()}명 입니다.`, 'warning');
-  students=[...arr]; seatArr=[...students]; lockedArr=Array(totalSeats()).fill(false);
-  saveStorage(); renderAll();
-  showNotification('학생 이름이 저장되었습니다.','success');
+  const inputLines = document.getElementById('nameInput').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  
+  if(inputLines.length !== totalSeats()) {
+    return showNotification(`현재 자리 수는 ${totalSeats()}명 입니다.`, 'warning');
+  }
+  
+  const nameArr = [];
+  const genderArr = [];
+  
+  // 이름/성별 파싱
+  inputLines.forEach(line => {
+    const parts = line.split('/');
+    const name = parts[0] ? parts[0].trim() : '빈칸';
+    const genderNum = parts[1] ? parts[1].trim() : '1';
+    
+    nameArr.push(name);
+    // 1이면 남자, 2면 여자, 그 외는 남자로 처리
+    genderArr.push(genderNum === '2' ? '여' : '남');
+  });
+  
+  students = [...nameArr]; 
+  studentGenders = [...genderArr];
+  genderPairMode = document.getElementById('genderPairMode').checked;
+  seatArr = [...students]; 
+  lockedArr = Array(totalSeats()).fill(false);
+  
+  // 로컬스토리지에 성별 정보 저장
+  localStorage.setItem('class_genders', JSON.stringify(studentGenders));
+  localStorage.setItem('gender_pair_mode', JSON.stringify(genderPairMode));
+  
+  saveStorage(); 
+  renderAll();
+  showNotification('학생 이름과 성별이 저장되었습니다.','success');
 }
 
 /*************************************************
@@ -743,16 +809,120 @@ function saveLayout(){
   saveStorage(); renderAll();
   showNotification('교실 설정이 저장되었습니다.','success');
 }
-
+function arrangeByNumber(){
+  // 맨 왼쪽부터 번호순으로 배치
+  let studentIndex = 0;
+  
+  // 각 분단을 순회하면서 왼쪽 자리부터 채우기
+  for(let sec = 0; sec < rowsInput.length; sec++) {
+    for(let row = 0; row < rowsInput[sec]; row++) {
+      const leftSeatIdx = idx(sec, row, 0); // 왼쪽 자리
+      
+      if(!lockedArr[leftSeatIdx] && studentIndex < students.length) {
+        seatArr[leftSeatIdx] = students[studentIndex];
+        studentIndex++;
+      }
+    }
+  }
+  
+  // 왼쪽 자리를 다 채운 후 오른쪽 자리 채우기
+  for(let sec = 0; sec < rowsInput.length; sec++) {
+    for(let row = 0; row < rowsInput[sec]; row++) {
+      const rightSeatIdx = idx(sec, row, 1); // 오른쪽 자리
+      
+      if(!lockedArr[rightSeatIdx] && studentIndex < students.length) {
+        seatArr[rightSeatIdx] = students[studentIndex];
+        studentIndex++;
+      }
+    }
+  }
+  
+  renderAll(); 
+  saveStorage();
+  showNotification('번호순으로 배치되었습니다.','success');
+}
 /*************************************************
  * 6. 무작위 배치 (잠금 제외)
  *************************************************/
 function shuffleSeats(){
-  const available = seatArr.filter((_,i)=>!lockedArr[i]);
-  rand(available);
-  let p=0; for(let i=0;i<seatArr.length;i++) if(!lockedArr[i]) seatArr[i]=available[p++];
-  renderAll(); saveStorage();
-  showNotification('자리 배치가 변경되었습니다.','success');
+  if(genderPairMode && studentGenders.length === students.length) {
+    // 남녀 짝궁 모드
+    const maleStudents = [];
+    const femaleStudents = [];
+    
+    // 잠기지 않은 학생들을 성별로 분류
+    for(let i = 0; i < seatArr.length; i++) {
+      if(!lockedArr[i]) {
+        const studentName = seatArr[i];
+        const originalIndex = students.indexOf(studentName);
+        if(originalIndex !== -1) {
+          if(studentGenders[originalIndex] === '남') {
+            maleStudents.push(studentName);
+          } else {
+            femaleStudents.push(studentName);
+          }
+        }
+      }
+    }
+    
+    // 각 성별 그룹을 섞기
+    rand(maleStudents);
+    rand(femaleStudents);
+    
+    let maleIndex = 0;
+    let femaleIndex = 0;
+    
+    // 각 책상(2자리)마다 남녀 한 명씩 배치
+    for(let sec = 0; sec < rowsInput.length; sec++) {
+      for(let row = 0; row < rowsInput[sec]; row++) {
+        const leftIdx = idx(sec, row, 0);
+        const rightIdx = idx(sec, row, 1);
+        
+        // 둘 다 잠기지 않은 경우에만 남녀 짝궁 배치
+        if(!lockedArr[leftIdx] && !lockedArr[rightIdx]) {
+          if(maleIndex < maleStudents.length && femaleIndex < femaleStudents.length) {
+            // 랜덤하게 남학생을 왼쪽 또는 오른쪽에 배치
+            if(Math.random() < 0.5) {
+              seatArr[leftIdx] = maleStudents[maleIndex++];
+              seatArr[rightIdx] = femaleStudents[femaleIndex++];
+            } else {
+              seatArr[leftIdx] = femaleStudents[femaleIndex++];
+              seatArr[rightIdx] = maleStudents[maleIndex++];
+            }
+          }
+        }
+      }
+    }
+    
+    // 남은 학생들을 빈 자리에 배치
+    const remainingStudents = [...maleStudents.slice(maleIndex), ...femaleStudents.slice(femaleIndex)];
+    rand(remainingStudents);
+    
+    let remainingIndex = 0;
+    for(let i = 0; i < seatArr.length; i++) {
+      if(!lockedArr[i] && remainingIndex < remainingStudents.length) {
+        const currentStudent = seatArr[i];
+        if(!maleStudents.slice(0, maleIndex).includes(currentStudent) && 
+           !femaleStudents.slice(0, femaleIndex).includes(currentStudent)) {
+          seatArr[i] = remainingStudents[remainingIndex++];
+        }
+      }
+    }
+    
+    showNotification('남녀 짝궁으로 배치되었습니다.','success');
+  } else {
+    // 기존 랜덤 배치
+    const available = seatArr.filter((_,i)=>!lockedArr[i]);
+    rand(available);
+    let p=0; 
+    for(let i=0;i<seatArr.length;i++) {
+      if(!lockedArr[i]) seatArr[i]=available[p++];
+    }
+    showNotification('자리 배치가 변경되었습니다.','success');
+  }
+  
+  renderAll(); 
+  saveStorage();
 }
 
 /*************************************************
@@ -781,9 +951,11 @@ function renderAll(){
     layout.appendChild(secDiv);
   });
   bindSeatEvents();
-  document.getElementById('nameInput').value=students.join('\n');
-  document.getElementById('secCount').value=rowsInput.length;
-  document.getElementById('rowPattern').value=rowsInput.join(',');
+   document.getElementById('nameInput').value = students.join('\n');
+  document.getElementById('genderPairMode').checked = genderPairMode;
+  document.getElementById('secCount').value = rowsInput.length;
+  document.getElementById('rowPattern').value = rowsInput.join(',');
+  
 }
 
 function bindSeatEvents(){
