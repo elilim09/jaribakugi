@@ -441,7 +441,7 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    padding-top: 9rem;
+    padding-top: 5rem;
     margin-top: auto;
   }
   
@@ -813,29 +813,25 @@ function arrangeByNumber(){
   // 맨 왼쪽부터 번호순으로 배치
   let studentIndex = 0;
   
-  // 각 분단을 순회하면서 왼쪽 자리부터 채우기
-  for(let sec = 0; sec < rowsInput.length; sec++) {
-    for(let row = 0; row < rowsInput[sec]; row++) {
-      const leftSeatIdx = idx(sec, row, 0); // 왼쪽 자리
-      
-      if(!lockedArr[leftSeatIdx] && studentIndex < students.length) {
-        seatArr[leftSeatIdx] = students[studentIndex];
-        studentIndex++;
-      }
+  for (let sec = 0; sec < rowsInput.length; sec++) {
+  for (let row = 0; row < rowsInput[sec]; row++) {
+    const leftSeatIdx = idx(sec, row, 0);  // 왼쪽 자리
+    const rightSeatIdx = idx(sec, row, 1); // 오른쪽 자리
+
+    // 왼쪽 자리 채우기
+    if (!lockedArr[leftSeatIdx] && studentIndex < students.length) {
+      seatArr[leftSeatIdx] = students[studentIndex];
+      studentIndex++;
+    }
+
+    // 오른쪽 자리 채우기
+    if (!lockedArr[rightSeatIdx] && studentIndex < students.length) {
+      seatArr[rightSeatIdx] = students[studentIndex];
+      studentIndex++;
     }
   }
-  
-  // 왼쪽 자리를 다 채운 후 오른쪽 자리 채우기
-  for(let sec = 0; sec < rowsInput.length; sec++) {
-    for(let row = 0; row < rowsInput[sec]; row++) {
-      const rightSeatIdx = idx(sec, row, 1); // 오른쪽 자리
-      
-      if(!lockedArr[rightSeatIdx] && studentIndex < students.length) {
-        seatArr[rightSeatIdx] = students[studentIndex];
-        studentIndex++;
-      }
-    }
-  }
+}
+
   
   renderAll(); 
   saveStorage();
