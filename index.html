@@ -3,14 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>교실 자리 바꾸기</title>
-
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>교실 자리 바꾸기</title>
+<title> 자리 바꾸기</title>
 
 <!-- ▶︎ 스타일 (사용자가 주신 디자인 그대로) ---------------------------------- -->
 <style>
@@ -445,29 +438,42 @@
     margin-top: auto;
   }
   
-  /* 인쇄시 스타일 */
   @media print {
-    .noprint {
-      display: none !important;
-    }
-    
-    body {
-      background: white;
-      display: block;
-    }
-    
-    .main {
-      margin-left: 0;
-      width: 100%;
-      padding: 0;
-    }
-    
-    .section {
-      box-shadow: none;
-      border: 1px solid var(--gray-300);
-      page-break-inside: avoid;
-    }
+  .noprint {
+    display: none !important;
   }
+  
+  .number-bar {
+    display: flex !important; /* 인쇄할 때만 표시 */
+  }
+  
+  .main-content {
+    display: flex;
+    gap: 0.1rem;
+    align-items: flex-start;
+  }
+  
+  .layout-container {
+    flex: 1;
+  }
+  
+  body {
+    background: white;
+    display: block;
+  }
+  
+  .main {
+    margin-left: 0;
+    width: 100%;
+    padding: 0;
+  }
+  
+  .section {
+    box-shadow: none;
+    border: 1px solid var(--gray-300);
+    page-break-inside: avoid;
+  }
+}
   
   /* 모바일 반응형 */
   @media (max-width: 1024px) {
@@ -492,6 +498,53 @@
       display: block;
     }
   }
+.number-bar {
+  display: none; /* 기본적으로 숨김 */
+  flex-direction: column;
+  gap: 0.1rem;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+  width: fit-content;
+  min-width: 120px;
+}
+
+.number-item {
+  display: flex;
+  align-items: center;
+  background: var(--gray-100);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.number-item .student-name {
+  color: var(--gray-700);
+}
+
+.number-item .student-number {
+  color: var(--primary);
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+}
+/* 이미지 저장용 클래스 */
+.for-image .number-bar {
+  display: flex !important;
+}
+
+.main-content {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.layout-container {
+  flex: 1;
+}
+
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -676,17 +729,19 @@
           </span>
         </div>
       </div>
+    <div class="main-content">
+    <div class="number-bar" id="numberBar"></div>
+    <div class="layout-container">
+      <div id="layout" class="sections"></div>
+    </div>
+  </div>
+      
       
 
       <div id="layout" class="sections"></div>
       
       <!-- 메인 콘텐츠 하단 광고 -->
-      <div class="ad-container noprint">
-        <ins class="kakao_ad_area" style="display:none;"
-          data-ad-unit = "DAN-ZTV5FcJFrcNn5K0j"
-          data-ad-width = "728"
-          data-ad-height = "90"></ins>
-      </div>
+      
     </main>
   </div>
   
@@ -930,7 +985,7 @@ function renderAll(){
   rowsInput.forEach((rows,sec)=>{
     const secDiv=document.createElement('div');
     secDiv.className='section';
-    secDiv.innerHTML=`<h2>${sec+1}분단</h2><div class="desks"></div>`;
+    secDiv.innerHTML=`<h2></h2><div class="desks"></div>`;
     const desks=secDiv.querySelector('.desks');
     for(let r=0;r<rows;r++){
       const l=idx(sec,r,0), rt=idx(sec,r,1);
@@ -947,13 +1002,27 @@ function renderAll(){
     layout.appendChild(secDiv);
   });
   bindSeatEvents();
+  renderNumberBar();
    document.getElementById('nameInput').value = students.join('\n');
   document.getElementById('genderPairMode').checked = genderPairMode;
   document.getElementById('secCount').value = rowsInput.length;
   document.getElementById('rowPattern').value = rowsInput.join(',');
   
 }
-
+function renderNumberBar(){
+  const numberBar = document.getElementById('numberBar');
+  numberBar.innerHTML = '';
+  
+  for(let i = 0; i < students.length; i++) {
+    const numberItem = document.createElement('div');
+    numberItem.className = 'number-item';
+    numberItem.innerHTML = `
+      <span class="student-number">${i + 1}</span>
+      <span class="student-name">${students[i]}</span>
+    `;
+    numberBar.appendChild(numberItem);
+  }
+  }
 function bindSeatEvents(){
   document.querySelectorAll('.seat').forEach(el=>{
     const i=+el.dataset.index;
@@ -992,10 +1061,29 @@ function saveAsCsv(){
   link.click();
 }
 async function saveAsImage(){
-  const canvas=await html2canvas(document.getElementById('layout'));
-  const link=document.createElement('a');
-  link.download=`seat_${Date.now()}.png`;
-  link.href=canvas.toDataURL();
+  // 임시로 번호표를 보이게 하기
+  const mainContent = document.querySelector('.main-content');
+  
+  // 이미지 저장용 클래스 추가
+  document.body.classList.add('for-image');
+  
+  // 전체 main-content를 캡처하도록 수정
+  const canvas = await html2canvas(mainContent, {
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: '#ffffff',
+    scale: 2, // 해상도 향상
+    logging: false,
+    height: mainContent.scrollHeight,
+    width: mainContent.scrollWidth
+  });
+  
+  // 클래스 제거
+  document.body.classList.remove('for-image');
+  
+  const link = document.createElement('a');
+  link.download = `seat_${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
   link.click();
 }
 async function saveAsPdf(){
