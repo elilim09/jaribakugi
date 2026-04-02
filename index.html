@@ -295,56 +295,73 @@
   /* 자리배치 */
   .sections {
     display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    justify-content: center;
+    flex-wrap: nowrap;
+    gap: clamp(0.75rem, 2vw, 2rem);
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow-x: hidden;
   }
   
   .section {
     background: white;
-    padding: 1.5rem;
+    padding: clamp(0.75rem, 1.5vw, 1.5rem);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     border: 1px solid var(--gray-200);
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    flex: 1 1 0;
   }
   
   .section h2 {
     text-align: center;
     margin-bottom: 1rem;
     color: var(--gray-700);
-    font-size: 1.125rem;
+    font-size: clamp(0.95rem, 1.4vw, 1.125rem);
   }
   
   .desks {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    min-width: 0;
   }
   
   .desk {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     background: var(--gray-100);
     border-radius: var(--radius);
-    padding: 0.5rem;
-    gap: 1rem;
+    padding: clamp(0.375rem, 0.8vw, 0.5rem);
+    gap: clamp(0.375rem, 0.8vw, 1rem);
+    width: 100%;
+    min-width: 0;
   }
   
   .seat {
-    flex: 1;
-    padding: 0.6rem 0.75rem;
+    padding: clamp(0.45rem, 0.9vw, 0.75rem);
     border-radius: calc(var(--radius) - 0.125rem);
     background: white;
     box-shadow: var(--shadow-sm);
     font-weight: 500;
-    text-align: center;
+    font-size: clamp(0.75rem, 1vw, 1rem);
     cursor: grab;
     user-select: none;
     position: relative;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
     transition: all 0.2s;
+  }
+
+  .seat-name {
+    line-height: 1.35;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
   
   .seat:hover {
@@ -354,7 +371,9 @@
   
   .seat.locked {
     background: #fff1f1;
-    border: 1px solid #ffd7d7;
+    border: 1px solid #f5b6b6;
+    box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.08);
+    color: #991b1b;
     cursor: not-allowed;
   }
   
@@ -364,9 +383,11 @@
   }
   
   .lock-icon {
-    display: inline-block;
-    margin-left: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     color: var(--danger);
+    flex-shrink: 0;
   }
   
   /* 툴팁 */
@@ -467,6 +488,21 @@
       border: 1px solid var(--gray-300);
       page-break-inside: avoid;
     }
+
+    .desk {
+      min-width: 0;
+    }
+
+    .seat.locked {
+      background: white !important;
+      border: none !important;
+      box-shadow: var(--shadow-sm) !important;
+      color: inherit !important;
+    }
+
+    .seat.locked .lock-icon {
+      color: inherit !important;
+    }
   }
   
   /* 모바일 반응형 */
@@ -486,6 +522,11 @@
     
     .mobile-toggle {
       display: flex;
+    }
+
+    .desk {
+      min-width: 0;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     
     .sidebar-overlay.open {
@@ -690,6 +731,7 @@ let activeTab = localStorage.getItem(LS_KEY.ACTIVE_TAB) || 'settings';
 const rand = arr => { for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; };
 const totalSeats = () => rowsInput.reduce((sum,row)=>sum+row*2,0);
 const idx = (sec,row,side)=> rowsInput.slice(0,sec).reduce((t,r)=>t+r*2,0) + row*2 + side;
+const escapeHtml = value => String(value).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 
 /*************************************************
  * 3. 저장 & 알림
@@ -771,10 +813,10 @@ function renderAll(){
       desks.insertAdjacentHTML('beforeend',`
         <div class="desk">
           <div class="seat ${lockedArr[l]?'locked':''}" draggable="true" data-index="${l}">
-            ${seatArr[l]}${lockedArr[l]?'<span class="lock-icon">🔒</span>':''}
+            <span class="seat-name">${escapeHtml(seatArr[l])}</span>${lockedArr[l]?'<span class="lock-icon" aria-hidden="true">🔒</span>':''}
           </div>
           <div class="seat ${lockedArr[rt]?'locked':''}" draggable="true" data-index="${rt}">
-            ${seatArr[rt]}${lockedArr[rt]?'<span class="lock-icon">🔒</span>':''}
+            <span class="seat-name">${escapeHtml(seatArr[rt])}</span>${lockedArr[rt]?'<span class="lock-icon" aria-hidden="true">🔒</span>':''}
           </div>
         </div>`);
     }
