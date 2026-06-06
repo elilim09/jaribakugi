@@ -263,7 +263,7 @@
     padding: 1rem;
   }
   
-  /* 탭 */
+  /* 탭 가로 분할 및 간격 */
   .tabs {
     display: flex;
     border-bottom: 1px solid var(--gray-200);
@@ -271,12 +271,15 @@
   }
   
   .tab-item {
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem 0.25rem;
+    font-size: 0.82rem;
     font-weight: 500;
     color: var(--gray-600);
     cursor: pointer;
     border-bottom: 2px solid transparent;
+    white-space: nowrap;
   }
   
   .tab-item.active {
@@ -300,6 +303,7 @@
     border: 1px solid var(--gray-200);
     flex: 1 0 min(18rem, 100%);
     min-width: 12rem;
+    transition: all 0.3s ease;
   }
 
   .section-title {
@@ -329,7 +333,7 @@
     border-radius: var(--radius);
     padding: clamp(0.375rem, 0.8vw, 0.5rem);
     border: 2px dashed transparent;
-    transition: border-color 0.2s, background 0.2s;
+    transition: border-color 0.2s, background 0.2s, border-radius 0.3s;
   }
 
   .desk-slot.drag-over {
@@ -352,7 +356,7 @@
     align-items: center;
     gap: 0.5rem;
     min-width: 0;
-    transition: all 0.2s;
+    transition: all 0.2s, border-radius 0.3s;
     min-height: 3.5rem;
   }
 
@@ -375,12 +379,96 @@
     min-height: 3.5rem;
   }
   
+  /* 기본 덮기 스타일 */
+  .seat.covered {
+    background: linear-gradient(135deg, #4f46e5, #818cf8) !important;
+    color: white !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    cursor: default;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .seat.covered::after {
+    content: "?";
+  }
+
+  .seat.covered .seat-name {
+    display: none !important;
+  }
+  
   .lock-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--danger);
     flex-shrink: 0;
+  }
+
+  /* ==========================================================================
+     ★ 테마 스타일별 테마 클래스 정의
+     ========================================================================== */
+  
+  /* [1] 동글동글 디자인 (theme-round) */
+  .theme-round .seat {
+    border-radius: 2rem !important;
+    border: 2px solid #e0e7ff;
+  }
+  .theme-round .desk-slot {
+    border-radius: 2rem !important;
+  }
+  .theme-round .seat.covered {
+    background: linear-gradient(135deg, #ec4899, #f43f5e) !important;
+    border-radius: 2rem !important;
+    border-color: #ffe4e6 !important;
+  }
+
+  /* [2] 네모네모 디자인 (theme-square) */
+  .theme-square .section,
+  .theme-square .desk-slot,
+  .theme-square .seat {
+    border-radius: 0px !important;
+  }
+  .theme-square .seat {
+    border: 2px solid var(--gray-800);
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.15);
+  }
+  .theme-square .seat.covered {
+    background: #1f2937 !important;
+    border: 2px solid var(--gray-800) !important;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  /* [3] 분필/칠판 디자인 (theme-chalkboard) */
+  .theme-chalkboard .section {
+    background: #064e3b !important;
+    border: 5px solid #78350f !important; /* 나무 느낌 액자 테두리 */
+    box-shadow: var(--shadow-lg);
+  }
+  .theme-chalkboard .section-title {
+    color: #fef08a !important; /* 분필 느낌 노란색 */
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  }
+  .theme-chalkboard .desk-slot {
+    background: #047857 !important;
+    border: 1.5px dashed rgba(255, 255, 255, 0.35) !important;
+  }
+  .theme-chalkboard .seat {
+    background: #f8fafc;
+    color: #1e293b;
+    border: 2.5px solid #10b981;
+    box-shadow: inset 0 -3px 0px rgba(0,0,0,0.08);
+  }
+  .theme-chalkboard .seat.covered {
+    background: #064e3b !important;
+    border: 2.5px dashed #fef08a !important;
+    color: #fef08a !important;
+    box-shadow: none !important;
   }
   
   /* 툴팁 */
@@ -520,7 +608,7 @@
       display: block;
     }
   }
-.app-container.hide-sidebar .sidebar {
+  .app-container.hide-sidebar .sidebar {
     display: none !important;
   }
   .app-container.hide-sidebar .main {
@@ -563,7 +651,7 @@
 }
 
 /* ==========================================================================
-   ★ [핵심 수정] 이미지 저장용 스타일 (.for-image) 
+   ★ 이미지 저장용 스타일 (.for-image) 
    ========================================================================== */
 .for-image .number-bar {
   display: flex !important;
@@ -667,7 +755,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* 번호바 너비(220px) + gap(1.5rem≈24px) 만큼 왼쪽으로 당겨서 시각적 중앙 맞춤 */
   margin-left: calc(240px - 1.5rem) !important;
   margin-right: 0 !important;
   flex: none !important;
@@ -716,28 +803,27 @@
   font-weight: 600;
 }
 
-/* transform: rotate(180deg) 제거 후 하위 Flex 구조를 뒤집어 안전한 대칭 이동 구현 */
+/* Flex 구조 뒤집기 */
 .for-image .sections {
-  flex-direction: row-reverse !important; /* 1분단 ~ 3분단 배치 좌우 반전 */
+  flex-direction: row-reverse !important;
   overflow: visible !important;
   gap: 1.5rem !important;
   transform: none !important;
 }
 
 .for-image .desks {
-  flex-direction: column-reverse !important; /* 앞줄과 뒷줄의 상하 관계 반전 */
+  flex-direction: column-reverse !important;
 }
 
 .for-image .desk {
   display: flex !important;
-  flex-direction: row-reverse !important; /* 각 분단 내부 책상의 좌우 자리 반전 */
+  flex-direction: row-reverse !important;
 }
 
 .for-image .desk-slot {
   flex: 1 !important;
 }
 
-/* 회전 속성이 제거되었으므로 텍스트 원복 처리 */
 .for-image .seat-name,
 .for-image .lock-icon {
   transform: none !important;
@@ -758,7 +844,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <meta name="google-site-verification" content="ycQBDGbSj3aiv4I7cq4_PEAstSELzF0qdALU8gtrOHo" />
 </head>
-<body>
+<body class="theme-default" id="appBody">
   <div class="app-container" id="appContainer">
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
@@ -775,6 +861,7 @@
       <div class="sidebar-content">
         <div class="tabs">
           <div class="tab-item active" data-tab="settings">설정</div>
+          <div class="tab-item" data-tab="style">스타일</div>
           <div class="tab-item" data-tab="students">학생</div>
           <div class="tab-item" data-tab="export">내보내기</div>
         </div>
@@ -798,6 +885,33 @@
             </svg>
             자동 재배치
           </button>
+        </div>
+
+        <!-- ★ 새롭게 추가된 스타일 설정 탭 -->
+        <div class="tab-content" id="styleTab" style="display: none;">
+          <div class="alert alert-info">
+            배치표 카드의 스타일 테마를 변경할 수 있습니다.
+          </div>
+          
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label class="form-label">디자인 테마 선택</label>
+            <button class="btn btn-primary" style="justify-content: flex-start; width: 100%; text-align: left;" onclick="changeTheme('default')" id="theme-btn-default">
+              <span style="width: 12px; height: 12px; border-radius: 3px; background: #4f46e5; display: inline-block; margin-right: 8px;"></span>
+              기본 디자인 (둥근 모서리)
+            </button>
+            <button class="btn btn-outline" style="justify-content: flex-start; width: 100%; text-align: left;" onclick="changeTheme('round')" id="theme-btn-round">
+              <span style="width: 12px; height: 12px; border-radius: 50%; background: #ec4899; display: inline-block; margin-right: 8px;"></span>
+              동글동글 디자인 (둥근 형태)
+            </button>
+            <button class="btn btn-outline" style="justify-content: flex-start; width: 100%; text-align: left;" onclick="changeTheme('square')" id="theme-btn-square">
+              <span style="width: 12px; height: 12px; border-radius: 0px; background: #1f2937; display: inline-block; margin-right: 8px;"></span>
+              네모네모 디자인 (직각 형태)
+            </button>
+            <button class="btn btn-outline" style="justify-content: flex-start; width: 100%; text-align: left;" onclick="changeTheme('chalkboard')" id="theme-btn-chalkboard">
+              <span style="width: 12px; height: 12px; border-radius: 2px; background: #064e3b; display: inline-block; margin-right: 8px; border: 1px solid #78350f;"></span>
+              칠판느낌 디자인 (초록 분필판)
+            </button>
+          </div>
         </div>
         
         <div class="tab-content" id="studentsTab" style="display: none;">
@@ -875,15 +989,24 @@
       <div class="main-header noprint" id="mainHeader">
         <h2>자리 배치표</h2>
         <div class="action-bar">
-          <span class="tooltip" data-tooltip="잠금된 자리는 그대로 유지됩니다">
-            <button class="btn btn-primary" onclick="shuffleSeats()">
-              <svg class="icon icon-sm" viewBox="0 0 24 24">
-                <polyline points="16 3 21 3 21 8"></polyline>
-                <line x1="4" y1="20" x2="21" y2="3"></line>
-              </svg>
-              자리 바꾸기
-            </button>
-          </span>
+          <button class="btn btn-outline" onclick="coverAllSeats()">
+            <svg class="icon icon-sm" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+            </svg>
+            카드 덮기
+          </button>
+          <button class="btn btn-primary" onclick="startSequentialReveal()">
+            <svg class="icon icon-sm" viewBox="0 0 24 24">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            차례대로 열기
+          </button>
+          <button class="btn btn-outline" onclick="revealAllSeats()">
+            모두 열기
+          </button>
         </div>
       </div>
       
@@ -919,7 +1042,8 @@ const LS_KEY = {
   LOCK  : 'class_locked',
   SEATS : 'class_seats',
   SECTION_COUNT : 'class_section_count',
-  ACTIVE_TAB: 'class_active_tab'
+  ACTIVE_TAB: 'class_active_tab',
+  THEME: 'class_theme'
 };
 
 let students   = JSON.parse(localStorage.getItem(LS_KEY.NAMES)  || '[]');
@@ -931,6 +1055,12 @@ let studentGenders = JSON.parse(localStorage.getItem('class_genders') || '[]');
 let genderPairMode = JSON.parse(localStorage.getItem('gender_pair_mode') || 'false');
 let sectionCount = Number(localStorage.getItem(LS_KEY.SECTION_COUNT)) || 3;
 let layoutShape = { sections: 3, rows: 1, seatsPerSection: 2, size: 6 };
+let currentTheme = localStorage.getItem(LS_KEY.THEME) || 'default';
+
+// 덮기 & 열기 제어 변수
+let isCovered = false;
+let revealedSet = new Set();
+let revealInterval = null;
 
 const rand = arr => { for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; };
 const escapeHtml = value => String(value).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
@@ -1019,6 +1149,7 @@ function saveStorage(){
   localStorage.setItem(LS_KEY.SEATS , JSON.stringify(seatArr));
   localStorage.setItem(LS_KEY.SECTION_COUNT, String(sectionCount));
   localStorage.setItem(LS_KEY.ACTIVE_TAB, activeTab);
+  localStorage.setItem(LS_KEY.THEME, currentTheme);
 }
 
 function showNotification(msg,type='info'){
@@ -1038,6 +1169,10 @@ function showNotification(msg,type='info'){
 }
 
 function saveNames(){
+  clearInterval(revealInterval);
+  isCovered = false;
+  revealedSet.clear();
+
   const inputLines = document.getElementById('nameInput').value.split('\n').map(s=>s.trim()).filter(Boolean);
   if(inputLines.length === 0) return showNotification('학생 이름을 한 명 이상 입력해주세요.','warning');
 
@@ -1066,6 +1201,10 @@ function saveNames(){
 }
 
 function resetAutoLayout(){
+  clearInterval(revealInterval);
+  isCovered = false;
+  revealedSet.clear();
+
   sectionCount = Math.max(1, Math.min(12, Number(document.getElementById('sectionCount').value) || 1));
   normalizeLayout(false);
   saveStorage(); renderAll();
@@ -1073,6 +1212,10 @@ function resetAutoLayout(){
 }
 
 function arrangeByNumber(){
+  clearInterval(revealInterval);
+  isCovered = false;
+  revealedSet.clear();
+
   const lockedNames = new Set(seatArr.filter((name, i) => lockedArr[i] && !isEmptySeat(name)));
   const unlockedStudents = students.filter(name => !lockedNames.has(name));
   let p = 0;
@@ -1086,6 +1229,11 @@ function arrangeByNumber(){
 }
 
 function shuffleSeats(){
+  clearInterval(revealInterval);
+  if (isCovered) {
+    revealedSet.clear();
+  }
+
   if(genderPairMode && studentGenders.length === students.length) {
     const maleStudents = [];
     const femaleStudents = [];
@@ -1115,8 +1263,6 @@ function shuffleSeats(){
       if(lockedArr[i]) return name;
       return p < mixed.length ? mixed[p++] : null;
     });
-
-    showNotification('남녀 짝궁으로 배치되었습니다.','success');
   } else {
     const available = seatArr.filter((name,i)=>!lockedArr[i] && !isEmptySeat(name));
     rand(available);
@@ -1124,11 +1270,100 @@ function shuffleSeats(){
     for(let i=0;i<seatArr.length;i++) {
       if(!lockedArr[i]) seatArr[i]=p < available.length ? available[p++] : null;
     }
-    showNotification('자리 배치가 변경되었습니다.','success');
   }
   
   renderAll(); 
   saveStorage();
+}
+
+// 덮기 & 열기 전용 동작 함수들
+function coverAllSeats() {
+  clearInterval(revealInterval);
+  isCovered = true;
+  revealedSet.clear();
+  renderAll();
+}
+
+function revealAllSeats() {
+  clearInterval(revealInterval);
+  isCovered = false;
+  revealedSet.clear();
+  renderAll();
+}
+
+function startSequentialReveal() {
+  clearInterval(revealInterval);
+
+  if (!isCovered) {
+    isCovered = true;
+    revealedSet.clear();
+    renderAll();
+  }
+
+  const occupiedIndices = [];
+  for (let row = 0; row < layoutShape.rows; row++) {
+    for (let sec = 0; sec < layoutShape.sections; sec++) {
+      for (let side = 0; side < 2; side++) {
+        const idx = seatIndex(sec, row, side);
+        if (!isEmptySeat(seatArr[idx])) {
+          occupiedIndices.push(idx);
+        }
+      }
+    }
+  }
+
+  const toReveal = occupiedIndices.filter(idx => !revealedSet.has(idx));
+  if (toReveal.length === 0) {
+    isCovered = false;
+    renderAll();
+    showNotification('모든 자리가 이미 열려 있습니다.', 'info');
+    return;
+  }
+
+  let p = 0;
+  revealInterval = setInterval(() => {
+    if (p >= toReveal.length) {
+      clearInterval(revealInterval);
+      isCovered = false;
+      revealedSet.clear();
+      renderAll();
+      showNotification('모든 자리가 열렸습니다.', 'success');
+      return;
+    }
+    revealedSet.add(toReveal[p]);
+    renderAll();
+    p++;
+  }, 300); // 0.3초 마다 순차 공개
+}
+
+/* ★ 테마(스타일) 변경 시스템 제어 함수 */
+function applyTheme(themeName) {
+  const appContainer = document.getElementById('appContainer');
+  appContainer.classList.remove('theme-default', 'theme-round', 'theme-square', 'theme-chalkboard');
+  appContainer.classList.add('theme-' + themeName);
+  
+  currentTheme = themeName;
+  localStorage.setItem(LS_KEY.THEME, themeName);
+  
+  // 버튼 디자인 상태 동기화
+  const themes = ['default', 'round', 'square', 'chalkboard'];
+  themes.forEach(t => {
+    const btn = document.getElementById('theme-btn-' + t);
+    if(btn) {
+      if(t === themeName) {
+        btn.classList.remove('btn-outline');
+        btn.classList.add('btn-primary');
+      } else {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline');
+      }
+    }
+  });
+}
+
+function changeTheme(themeName) {
+  applyTheme(themeName);
+  showNotification('배치표 디자인 스타일이 변경되었습니다.', 'success');
 }
 
 function renderAll(){
@@ -1156,10 +1391,18 @@ function renderAll(){
         if(isEmptySeat(name)) {
           slot.innerHTML = '<div class="seat empty" aria-label="빈 자리"></div>';
         } else {
-          slot.innerHTML = `
-            <div class="seat ${lockedArr[i]?'locked':''}" draggable="true" data-index="${i}">
-              <span class="seat-name">${lockedArr[i]?'<span class="lock-icon" aria-hidden="true">&#128274;</span>':''}${escapeHtml(name)}</span>
-            </div>`;
+          const isCurrentlyCovered = isCovered && !revealedSet.has(i);
+          if (isCurrentlyCovered) {
+            slot.innerHTML = `
+              <div class="seat covered ${lockedArr[i]?'locked':''}" data-index="${i}">
+                <!-- 이름 숨김 -->
+              </div>`;
+          } else {
+            slot.innerHTML = `
+              <div class="seat ${lockedArr[i]?'locked':''}" draggable="true" data-index="${i}">
+                <span class="seat-name">${lockedArr[i]?'<span class="lock-icon" aria-hidden="true">&#128274;</span>':''}${escapeHtml(name)}</span>
+              </div>`;
+          }
         }
 
         desk.appendChild(slot);
@@ -1185,13 +1428,11 @@ function renderNumberBar(){
   const numberBar = document.getElementById('numberBar');
   numberBar.innerHTML = '';
   
-  // 헤더 추가
   const header = document.createElement('div');
   header.className = 'number-bar-header';
   header.textContent = '학생 명단';
   numberBar.appendChild(header);
 
-  // 리스트 래퍼
   const list = document.createElement('div');
   list.className = 'number-bar-list';
 
@@ -1222,6 +1463,13 @@ function bindSeatEvents(){
   document.querySelectorAll('.seat').forEach(el=>{
     if(el.classList.contains('empty')) return;
     const i=+el.dataset.index;
+    
+    if (el.classList.contains('covered')) {
+      el.ondragstart = e => e.preventDefault();
+      el.onclick = null;
+      return;
+    }
+    
     el.ondragstart=e=>{ if(lockedArr[i]){e.preventDefault();} else {e.dataTransfer.setData('text/plain',i);} };
     el.onclick=()=>{ lockedArr[i]=!lockedArr[i]; renderAll(); saveStorage(); };
   });
@@ -1244,25 +1492,28 @@ function saveAsCsv(){
   link.click();
 }
 
-/* ★ [수정] 자바스크립트 내 레이아웃 연산 타이밍 확보를 위한 딜레이 추가 */
 async function captureExportCanvas(){
   const appContainer = document.getElementById('appContainer');
   const captureArea = document.getElementById('captureArea');
   const mainHeader = document.getElementById('mainHeader');
   const sidebar = document.getElementById('sidebar');
   
-  // 1. 사이드바 숨김 + for-image 클래스 추가
+  // 저장 결과물 출력할 땐 항상 이름을 다 채워서 생성하도록 유도
+  const originalIsCovered = isCovered;
+  const originalRevealedSet = new Set(revealedSet);
+  isCovered = false;
+  revealedSet.clear();
+  renderAll();
+
   appContainer.classList.add('hide-sidebar');
   captureArea.classList.add('for-image');
   mainHeader.style.setProperty('display', 'none', 'important');
   sidebar.style.setProperty('display', 'none', 'important');
   
   try {
-    // DOM 리플로우 대기
     await new Promise(requestAnimationFrame);
     await new Promise(resolve => setTimeout(resolve, 300));
     
-    // 캡처 영역의 실제 크기
     const w = captureArea.scrollWidth;
     const h = captureArea.scrollHeight;
 
@@ -1280,7 +1531,10 @@ async function captureExportCanvas(){
       windowHeight: h
     });
   } finally {
-    // 3. 복구
+    isCovered = originalIsCovered;
+    revealedSet = originalRevealedSet;
+    renderAll();
+
     appContainer.classList.remove('hide-sidebar');
     captureArea.classList.remove('for-image');
     mainHeader.style.removeProperty('display');
@@ -1312,6 +1566,10 @@ function showTab(tab){
 document.querySelectorAll('.tab-item').forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
 
 document.getElementById('sectionCount').onchange=()=>{
+  clearInterval(revealInterval);
+  isCovered = false;
+  revealedSet.clear();
+
   sectionCount = Math.max(1, Math.min(12, Number(document.getElementById('sectionCount').value) || 1));
   syncSeatSize();
   renderAll();
@@ -1327,6 +1585,7 @@ overlay.onclick=()=>{sidebar.classList.remove('open');overlay.classList.remove('
 
 (function init(){
   syncSeatSize();
+  applyTheme(currentTheme);
   renderAll();
   showTab(activeTab);
 })();
